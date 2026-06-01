@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SSB Word Association Test</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #13161e;
+      --surface2:  #1a1e28;
+      --border:    rgba(255,255,255,0.08);
+      --border2:   rgba(255,255,255,0.14);
+      --text:      #e8eaf0;
+      --muted:     #6b7280;
+      --accent:    #e2c97e;
+      --accent2:   #c9a84c;
+      --danger:    #e25c5c;
+      --warn:      #e2a45c;
+      --success:   #5ce2a4;
+      --radius:    10px;
+      --radius-lg: 16px;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'Sora', sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    body {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 640px;
+    }
+
+    /* ── Header ── */
+    .header {
+      margin-bottom: 2rem;
+      border-bottom: 0.5px solid var(--border2);
+      padding-bottom: 1.25rem;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 99px;
+      border: 0.5px solid var(--accent2);
+      color: var(--accent);
+      background: rgba(226,201,126,0.07);
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-label {
+      font-size: 11px;
+      font-family: var(--mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    /* ── Textarea ── */
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      resize: vertical;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.8;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+    textarea:focus { outline: none; border-color: var(--accent2); }
+    textarea::placeholder { color: var(--muted); }
+    textarea.error { border-color: var(--danger) !important; }
+
+    /* ── Interval slider ── */
+    .interval-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 1.25rem;
+    }
+    .interval-row span {
+      font-size: 12px;
+      font-family: var(--mono);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    input[type=range] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 3px;
+      border-radius: 99px;
+      background: var(--border2);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    input[type=range]::-moz-range-thumb {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg);
+      cursor: pointer;
+    }
+    .interval-display {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent);
+      min-width: 42px;
+      text-align: right;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .word-count {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; gap: 10px; margin-top: 1.25rem; flex-wrap: wrap; }
+    button {
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 9px 20px;
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border2);
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    button:hover { background: var(--surface2); border-color: var(--border2); }
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    button.primary {
+      background: var(--accent);
+      color: #0d0f14;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    button.primary:hover { background: var(--accent2); border-color: var(--accent2); }
+
+    button.danger {
+      border-color: rgba(226,92,92,0.4);
+      color: var(--danger);
+    }
+    button.danger:hover { background: rgba(226,92,92,0.08); }
+
+    /* ── Display panel ── */
+    #displayPanel { display: none; text-align: center; }
+    #displayPanel.active { display: block; }
+
+    .word-stage {
+      padding: 2.5rem 1.5rem 2rem;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #wordDisplay {
+      font-family: var(--mono);
+      font-size: 52px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0.04em;
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #wordDisplay.flash {
+      animation: wordFlash 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes wordFlash {
+      from { opacity: 0; transform: scale(0.88) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* ── Timer ring ── */
+    .ring-wrap {
+      margin: 1.25rem 0 0.75rem;
+      display: flex;
+      justify-content: center;
+    }
+    #timerRing { overflow: visible; }
+    #ringArc {
+      transition: stroke-dashoffset 0.15s linear, stroke 0.3s;
+    }
+
+    .progress-info {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* ── Summary ── */
+    #summaryPanel { display: none; }
+    #summaryPanel.active { display: block; }
+
+    .summary-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.25rem;
+    }
+    .summary-header h2 {
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .done-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 99px;
+      border: 0.5px solid rgba(92,226,164,0.4);
+      color: var(--success);
+      background: rgba(92,226,164,0.07);
+    }
+
+    .word-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 1.25rem;
+    }
+    .word-pill {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 5px 14px;
+      border-radius: 99px;
+      border: 0.5px solid var(--border2);
+      color: var(--muted);
+    }
+    .word-pill.shown {
+      color: var(--success);
+      border-color: rgba(92,226,164,0.35);
+      background: rgba(92,226,164,0.06);
+    }
+    .word-pill.skipped {
+      color: var(--muted);
+      border-color: var(--border);
+      opacity: 0.5;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1.25rem;
+    }
+    .stat-box {
+      flex: 1;
+      background: var(--surface2);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      border: 0.5px solid var(--border);
+    }
+    .stat-box .val {
+      font-family: var(--mono);
+      font-size: 24px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+    .stat-box .lbl {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-top">
+      <span class="badge">SSB Psych</span>
+      <h1>Word Association Test</h1>
+    </div>
+    <p class="subtitle">Enter your word list, set the interval, and begin the WAT session.</p>
+  </div>
+
+  <!-- Setup -->
+  <div class="card" id="setupPanel">
+    <div class="card-label">Word list</div>
+    <textarea id="wordInput" placeholder="brave, calm, leader, honest, duty, friend, river, cloud, fire, jungle…"></textarea>
+    <div class="meta-row">
+      <span class="word-count" id="wordCount">0 words loaded</span>
+    </div>
+
+    <div class="interval-row">
+      <span>Interval</span>
+      <input type="range" id="intervalSlider" min="10" max="60" step="1" value="15" />
+      <span class="interval-display"><span id="intervalVal">15</span>s</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="primary" id="loadBtn" onclick="loadWords()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Load words &amp; start WAT
+      </button>
+    </div>
+  </div>
+
+  <!-- Display -->
+  <div class="card" id="displayPanel">
+    <div class="word-stage">
+      <div id="wordDisplay">—</div>
+      <div class="ring-wrap">
+        <svg id="timerRing" width="76" height="76" viewBox="0 0 76 76">
+          <circle cx="38" cy="38" r="32" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="5"/>
+          <circle id="ringArc" cx="38" cy="38" r="32" fill="none"
+            stroke="#e2c97e" stroke-width="5" stroke-linecap="round"
+            stroke-dasharray="201.06" stroke-dashoffset="0"
+            transform="rotate(-90 38 38)"/>
+          <text id="ringNum" x="38" y="43" text-anchor="middle"
+            font-family="'IBM Plex Mono', monospace" font-size="17" font-weight="500"
+            fill="#e8eaf0">15</text>
+        </svg>
+      </div>
+      <div class="progress-info" id="progressInfo">Word 1 of 0</div>
+    </div>
+    <div class="controls">
+      <button id="pauseBtn" onclick="togglePause()">
+        <svg id="pauseIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        <span id="pauseLabel">Pause</span>
+      </button>
+      <button class="danger" onclick="finishTest()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 16M4 20L20 4"/></svg>
+        Finish
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="card" id="summaryPanel">
+    <div class="summary-header">
+      <h2>Session complete</h2>
+      <span class="done-badge">Done</span>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="val" id="statShown">0</div>
+        <div class="lbl">Words shown</div>
+      </div>
+      <div class="stat-box">
+        <div class="val" id="statSkipped">0</div>
+        <div class="lbl">Not reached</div>
+      </div>
+      <div class="stat-box">
+        <div class="val" id="statTime">0s</div>
+        <div class="lbl">Interval used</div>
+      </div>
+    </div>
+    <div class="word-list" id="wordListSummary"></div>
+    <div>
+      <button onclick="resetAll()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+        New session
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ── State ── */
+  let words      = [];
+  let current    = 0;
+  let interval   = 15;
+  let timeLeft   = 15;
+  let paused     = false;
+  let finished   = false;
+  let timer      = null;
+  let shownSet   = new Set();
+  const CIRC     = 2 * Math.PI * 32; // r=32
+
+  /* ── DOM refs ── */
+  const wordInput    = document.getElementById('wordInput');
+  const wordCountEl  = document.getElementById('wordCount');
+  const intervalSldr = document.getElementById('intervalSlider');
+  const intervalVal  = document.getElementById('intervalVal');
+  const wordDisplay  = document.getElementById('wordDisplay');
+  const ringArc      = document.getElementById('ringArc');
+  const ringNum      = document.getElementById('ringNum');
+  const progressInfo = document.getElementById('progressInfo');
+  const pauseBtn     = document.getElementById('pauseBtn');
+  const pauseLabel   = document.getElementById('pauseLabel');
+  const pauseIcon    = document.getElementById('pauseIcon');
+  const setupPanel   = document.getElementById('setupPanel');
+  const displayPanel = document.getElementById('displayPanel');
+  const summaryPanel = document.getElementById('summaryPanel');
+
+  /* ── Slider ── */
+  intervalSldr.addEventListener('input', () => {
+    interval = parseInt(intervalSldr.value);
+    intervalVal.textContent = interval;
+  });
+
+  /* ── Word count live update ── */
+  wordInput.addEventListener('input', () => {
+    wordCountEl.textContent = parseWords(wordInput.value).length + ' words loaded';
+    wordInput.classList.remove('error');
+  });
+
+  function parseWords(raw) {
+    return raw.split(/[\n,]+/).map(w => w.trim()).filter(w => w.length > 0);
+  }
+
+  /* ── Load & start ── */
+  function loadWords() {
+    const parsed = parseWords(wordInput.value);
+    if (parsed.length === 0) {
+      wordInput.classList.add('error');
+      wordInput.focus();
+      return;
+    }
+    words    = parsed;
+    current  = 0;
+    shownSet = new Set();
+    finished = false;
+    paused   = false;
+    interval = parseInt(intervalSldr.value);
+
+    setupPanel.style.display = 'none';
+    displayPanel.classList.add('active');
+    summaryPanel.classList.remove('active');
+    pauseLabel.textContent = 'Pause';
+    setPauseIcon(false);
+
+    showWord();
+  }
+
+  /* ── Show word ── */
+  function showWord() {
+    if (current >= words.length) { finishTest(); return; }
+    const w = words[current];
+    shownSet.add(w);
+
+    wordDisplay.textContent = w;
+    wordDisplay.classList.remove('flash');
+    void wordDisplay.offsetWidth;
+    wordDisplay.classList.add('flash');
+
+    progressInfo.textContent = 'Word ' + (current + 1) + ' of ' + words.length;
+    timeLeft = interval;
+    updateRing();
+
+    clearInterval(timer);
+    timer = setInterval(tick, 1000);
+  }
+
+  /* ── Tick ── */
+  function tick() {
+    if (paused) return;
+    timeLeft--;
+    updateRing();
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      current++;
+      if (!finished) showWord();
+    }
+  }
+
+  /* ── Ring ── */
+  function updateRing() {
+    const frac   = Math.max(0, timeLeft / interval);
+    const offset = CIRC * (1 - frac);
+    ringArc.style.strokeDashoffset = offset;
+    ringNum.textContent = timeLeft;
+
+    if (timeLeft <= 5)                          ringArc.style.stroke = '#e25c5c';
+    else if (timeLeft <= Math.ceil(interval * 0.4)) ringArc.style.stroke = '#e2a45c';
+    else                                         ringArc.style.stroke = '#e2c97e';
+  }
+
+  /* ── Pause / resume ── */
+  function togglePause() {
+    paused = !paused;
+    pauseLabel.textContent = paused ? 'Resume' : 'Pause';
+    setPauseIcon(paused);
+  }
+
+  function setPauseIcon(isPlay) {
+    pauseIcon.innerHTML = isPlay
+      ? '<polygon points="5 3 19 12 5 21 5 3"/>'
+      : '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+  }
+
+  /* ── Finish ── */
+  function finishTest() {
+    finished = true;
+    clearInterval(timer);
+
+    displayPanel.classList.remove('active');
+    summaryPanel.classList.add('active');
+
+    const shown   = shownSet.size;
+    const skipped = words.length - shown;
+    document.getElementById('statShown').textContent   = shown;
+    document.getElementById('statSkipped').textContent = skipped;
+    document.getElementById('statTime').textContent    = interval + 's';
+
+    const container = document.getElementById('wordListSummary');
+    container.innerHTML = '';
+    words.forEach(w => {
+      const pill = document.createElement('span');
+      pill.className = 'word-pill ' + (shownSet.has(w) ? 'shown' : 'skipped');
+      pill.textContent = w;
+      container.appendChild(pill);
+    });
+  }
+
+  /* ── Reset ── */
+  function resetAll() {
+    clearInterval(timer);
+    words = []; current = 0; shownSet = new Set();
+    paused = false; finished = false;
+    wordInput.value = '';
+    wordCountEl.textContent = '0 words loaded';
+    setupPanel.style.display = '';
+    displayPanel.classList.remove('active');
+    summaryPanel.classList.remove('active');
+  }
+</script>
+</body>
+</html>
