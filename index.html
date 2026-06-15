@@ -1,617 +1,755 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SSB Word Association Test</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:        #0d0f14;
-      --surface:   #13161e;
-      --surface2:  #1a1e28;
-      --border:    rgba(255,255,255,0.08);
-      --border2:   rgba(255,255,255,0.14);
-      --text:      #e8eaf0;
-      --muted:     #6b7280;
-      --accent:    #e2c97e;
-      --accent2:   #c9a84c;
-      --danger:    #e25c5c;
-      --warn:      #e2a45c;
-      --success:   #5ce2a4;
-      --radius:    10px;
-      --radius-lg: 16px;
-      --mono:      'IBM Plex Mono', monospace;
-      --sans:      'Sora', sans-serif;
-    }
-
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      font-size: 15px;
-      line-height: 1.6;
-    }
-
-    body {
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 2.5rem 1rem 4rem;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 640px;
-    }
-
-    /* ── Header ── */
-    .header {
-      margin-bottom: 2rem;
-      border-bottom: 0.5px solid var(--border2);
-      padding-bottom: 1.25rem;
-    }
-    .header-top {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 6px;
-    }
-    .badge {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 3px 10px;
-      border-radius: 99px;
-      border: 0.5px solid var(--accent2);
-      color: var(--accent);
-      background: rgba(226,201,126,0.07);
-    }
-    h1 {
-      font-size: 22px;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: -0.01em;
-    }
-    .subtitle {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    /* ── Cards ── */
-    .card {
-      background: var(--surface);
-      border: 0.5px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .card-label {
-      font-size: 11px;
-      font-family: var(--mono);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-
-    /* ── Textarea ── */
-    textarea {
-      width: 100%;
-      min-height: 100px;
-      resize: vertical;
-      font-family: var(--mono);
-      font-size: 13px;
-      line-height: 1.8;
-      padding: 12px 14px;
-      border-radius: var(--radius);
-      border: 0.5px solid var(--border2);
-      background: var(--surface2);
-      color: var(--text);
-      transition: border-color 0.2s;
-    }
-    textarea:focus { outline: none; border-color: var(--accent2); }
-    textarea::placeholder { color: var(--muted); }
-    textarea.error { border-color: var(--danger) !important; }
-
-    /* ── Interval slider ── */
-    .interval-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-top: 1.25rem;
-    }
-    .interval-row span {
-      font-size: 12px;
-      font-family: var(--mono);
-      color: var(--muted);
-      white-space: nowrap;
-    }
-    input[type=range] {
-      flex: 1;
-      -webkit-appearance: none;
-      height: 3px;
-      border-radius: 99px;
-      background: var(--border2);
-      outline: none;
-      cursor: pointer;
-    }
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: 2px solid var(--bg);
-      cursor: pointer;
-      transition: transform 0.15s;
-    }
-    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-    input[type=range]::-moz-range-thumb {
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: 2px solid var(--bg);
-      cursor: pointer;
-    }
-    .interval-display {
-      font-family: var(--mono);
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--accent);
-      min-width: 42px;
-      text-align: right;
-    }
-
-    .meta-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 10px;
-    }
-    .word-count {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    /* ── Buttons ── */
-    .btn-row { display: flex; gap: 10px; margin-top: 1.25rem; flex-wrap: wrap; }
-    button {
-      font-family: var(--sans);
-      font-size: 13px;
-      font-weight: 500;
-      padding: 9px 20px;
-      border-radius: var(--radius);
-      border: 0.5px solid var(--border2);
-      background: transparent;
-      color: var(--text);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      transition: background 0.15s, border-color 0.15s, transform 0.1s;
-      white-space: nowrap;
-    }
-    button:hover { background: var(--surface2); border-color: var(--border2); }
-    button:active { transform: scale(0.97); }
-    button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
-
-    button.primary {
-      background: var(--accent);
-      color: #0d0f14;
-      border-color: var(--accent);
-      font-weight: 600;
-    }
-    button.primary:hover { background: var(--accent2); border-color: var(--accent2); }
-
-    button.danger {
-      border-color: rgba(226,92,92,0.4);
-      color: var(--danger);
-    }
-    button.danger:hover { background: rgba(226,92,92,0.08); }
-
-    /* ── Display panel ── */
-    #displayPanel { display: none; text-align: center; }
-    #displayPanel.active { display: block; }
-
-    .word-stage {
-      padding: 2.5rem 1.5rem 2rem;
-      min-height: 160px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #wordDisplay {
-      font-family: var(--mono);
-      font-size: 52px;
-      font-weight: 500;
-      color: var(--text);
-      letter-spacing: 0.04em;
-      min-height: 68px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #wordDisplay.flash {
-      animation: wordFlash 0.35s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    @keyframes wordFlash {
-      from { opacity: 0; transform: scale(0.88) translateY(8px); }
-      to   { opacity: 1; transform: scale(1) translateY(0); }
-    }
-
-    /* ── Timer ring ── */
-    .ring-wrap {
-      margin: 1.25rem 0 0.75rem;
-      display: flex;
-      justify-content: center;
-    }
-    #timerRing { overflow: visible; }
-    #ringArc {
-      transition: stroke-dashoffset 0.15s linear, stroke 0.3s;
-    }
-
-    .progress-info {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      margin-bottom: 1.25rem;
-    }
-
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    /* ── Summary ── */
-    #summaryPanel { display: none; }
-    #summaryPanel.active { display: block; }
-
-    .summary-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 1.25rem;
-    }
-    .summary-header h2 {
-      font-size: 15px;
-      font-weight: 500;
-    }
-    .done-badge {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 3px 10px;
-      border-radius: 99px;
-      border: 0.5px solid rgba(92,226,164,0.4);
-      color: var(--success);
-      background: rgba(92,226,164,0.07);
-    }
-
-    .word-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 1.25rem;
-    }
-    .word-pill {
-      font-family: var(--mono);
-      font-size: 12px;
-      padding: 5px 14px;
-      border-radius: 99px;
-      border: 0.5px solid var(--border2);
-      color: var(--muted);
-    }
-    .word-pill.shown {
-      color: var(--success);
-      border-color: rgba(92,226,164,0.35);
-      background: rgba(92,226,164,0.06);
-    }
-    .word-pill.skipped {
-      color: var(--muted);
-      border-color: var(--border);
-      opacity: 0.5;
-    }
-
-    .stats-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 1.25rem;
-    }
-    .stat-box {
-      flex: 1;
-      background: var(--surface2);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-      border: 0.5px solid var(--border);
-    }
-    .stat-box .val {
-      font-family: var(--mono);
-      font-size: 24px;
-      font-weight: 500;
-      color: var(--accent);
-    }
-    .stat-box .lbl {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SSB Psych Suite — WAT &amp; SRT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════
+   RESET & TOKENS
+═══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+ 
+:root{
+  --bg:       #0d0f14;
+  --surface:  #13161e;
+  --surface2: #1a1e28;
+  --surface3: #20253200;
+  --border:   rgba(255,255,255,0.08);
+  --border2:  rgba(255,255,255,0.14);
+  --text:     #e8eaf0;
+  --muted:    #6b7280;
+  --accent:   #e2c97e;
+  --accent2:  #c9a84c;
+  --blue:     #7eb8e2;
+  --blue2:    #4c96c9;
+  --danger:   #e25c5c;
+  --warn:     #e2a45c;
+  --success:  #5ce2a4;
+  --r:        10px;
+  --rl:       16px;
+  --mono:     'IBM Plex Mono',monospace;
+  --sans:     'Sora',sans-serif;
+}
+ 
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6}
+body{display:flex;align-items:flex-start;justify-content:center;min-height:100vh;padding:2.5rem 1rem 4rem}
+.container{width:100%;max-width:660px}
+ 
+/* ═══════════════════════════════════════════
+   TYPOGRAPHY & BADGE
+═══════════════════════════════════════════ */
+h1{font-size:22px;font-weight:600;letter-spacing:-0.01em}
+h2{font-size:16px;font-weight:500}
+h3{font-size:13px;font-weight:500}
+ 
+.badge{
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  padding:3px 10px;border-radius:99px;border:0.5px solid;
+  display:inline-block;
+}
+.badge.gold{border-color:var(--accent2);color:var(--accent);background:rgba(226,201,126,.07)}
+.badge.blue{border-color:var(--blue2);color:var(--blue);background:rgba(126,184,226,.07)}
+.badge.green{border-color:rgba(92,226,164,.4);color:var(--success);background:rgba(92,226,164,.07)}
+ 
+.card-label{font-size:11px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+ 
+/* ═══════════════════════════════════════════
+   CARD
+═══════════════════════════════════════════ */
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.5rem;margin-bottom:1rem}
+ 
+/* ═══════════════════════════════════════════
+   INPUTS
+═══════════════════════════════════════════ */
+textarea,input[type=file]{
+  width:100%;font-family:var(--mono);font-size:13px;line-height:1.8;
+  padding:12px 14px;border-radius:var(--r);border:0.5px solid var(--border2);
+  background:var(--surface2);color:var(--text);transition:border-color .2s;
+  display:block;
+}
+textarea{min-height:100px;resize:vertical}
+textarea:focus,input[type=file]:focus{outline:none;border-color:var(--accent2)}
+textarea::placeholder{color:var(--muted)}
+textarea.error,input.error{border-color:var(--danger)!important}
+ 
+input[type=file]{cursor:pointer;padding:10px 14px}
+input[type=file]::file-selector-button{
+  font-family:var(--sans);font-size:12px;padding:5px 12px;margin-right:12px;
+  border-radius:var(--r);border:0.5px solid var(--border2);
+  background:var(--surface2);color:var(--text);cursor:pointer;
+}
+ 
+/* ═══════════════════════════════════════════
+   SLIDER
+═══════════════════════════════════════════ */
+.interval-row{display:flex;align-items:center;gap:14px;margin-top:1.25rem}
+.interval-row span{font-size:12px;font-family:var(--mono);color:var(--muted);white-space:nowrap}
+input[type=range]{
+  flex:1;-webkit-appearance:none;height:3px;border-radius:99px;
+  background:var(--border2);outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:var(--accent);border:2px solid var(--bg);cursor:pointer;transition:transform .15s;
+}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+input[type=range]::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);cursor:pointer;
+}
+.interval-display{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--accent);min-width:42px;text-align:right}
+.interval-display.blue-val{color:var(--blue)}
+ 
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn-row{display:flex;gap:10px;margin-top:1.25rem;flex-wrap:wrap}
+button{
+  font-family:var(--sans);font-size:13px;font-weight:500;padding:9px 20px;
+  border-radius:var(--r);border:0.5px solid var(--border2);background:transparent;color:var(--text);
+  cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+  transition:background .15s,border-color .15s,transform .1s;white-space:nowrap;
+}
+button:hover{background:var(--surface2)}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.3;cursor:not-allowed;transform:none}
+button.primary{background:var(--accent);color:#0d0f14;border-color:var(--accent);font-weight:600}
+button.primary:hover{background:var(--accent2);border-color:var(--accent2)}
+button.primary.blue{background:var(--blue);border-color:var(--blue)}
+button.primary.blue:hover{background:var(--blue2);border-color:var(--blue2)}
+button.danger{border-color:rgba(226,92,92,.4);color:var(--danger)}
+button.danger:hover{background:rgba(226,92,92,.08)}
+ 
+/* ═══════════════════════════════════════════
+   META ROW
+═══════════════════════════════════════════ */
+.meta-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.item-count{font-family:var(--mono);font-size:11px;color:var(--muted)}
+ 
+/* ═══════════════════════════════════════════
+   TIMER RING
+═══════════════════════════════════════════ */
+.ring-wrap{margin:1.25rem 0 .75rem;display:flex;justify-content:center}
+ 
+/* ═══════════════════════════════════════════
+   PROGRESS INFO
+═══════════════════════════════════════════ */
+.progress-info{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted);margin-bottom:1.25rem;text-align:center}
+ 
+/* ═══════════════════════════════════════════
+   CONTROLS
+═══════════════════════════════════════════ */
+.controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+ 
+/* ═══════════════════════════════════════════
+   SUMMARY
+═══════════════════════════════════════════ */
+.summary-header{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
+.stats-row{display:flex;gap:10px;margin-bottom:1.25rem}
+.stat-box{flex:1;background:var(--surface2);border-radius:var(--r);padding:12px 14px;border:0.5px solid var(--border)}
+.stat-box .val{font-family:var(--mono);font-size:24px;font-weight:500;color:var(--accent)}
+.stat-box .val.blue{color:var(--blue)}
+.stat-box .lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.word-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.25rem}
+.word-pill{font-family:var(--mono);font-size:12px;padding:5px 14px;border-radius:99px;border:0.5px solid var(--border2);color:var(--muted)}
+.word-pill.shown{color:var(--success);border-color:rgba(92,226,164,.35);background:rgba(92,226,164,.06)}
+.word-pill.skipped{opacity:.45}
+ 
+/* SRT situation pills */
+.sit-pill{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border2);color:var(--muted)}
+.sit-pill.shown{color:var(--blue);border-color:rgba(126,184,226,.35);background:rgba(126,184,226,.06)}
+.sit-pill.skipped{opacity:.4}
+ 
+/* ═══════════════════════════════════════════
+   SCREEN VISIBILITY HELPERS
+═══════════════════════════════════════════ */
+.screen{display:none}
+.screen.active{display:block}
+ 
+/* ═══════════════════════════════════════════
+   HOME SCREEN
+═══════════════════════════════════════════ */
+.home-header{margin-bottom:2rem;border-bottom:0.5px solid var(--border2);padding-bottom:1.5rem}
+.home-header-top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.home-subtitle{font-size:13px;color:var(--muted);max-width:480px}
+ 
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1rem}
+@media(max-width:480px){.mode-grid{grid-template-columns:1fr}}
+ 
+.mode-card{
+  background:var(--surface);border:0.5px solid var(--border);border-radius:var(--rl);
+  padding:1.5rem;cursor:pointer;transition:border-color .2s,background .2s;
+  display:flex;flex-direction:column;gap:10px;
+}
+.mode-card:hover{border-color:var(--border2);background:var(--surface2)}
+.mode-card.gold-card:hover{border-color:var(--accent2)}
+.mode-card.blue-card:hover{border-color:var(--blue2)}
+ 
+.mode-icon{
+  width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+}
+.mode-icon.gold{background:rgba(226,201,126,.1);color:var(--accent)}
+.mode-icon.blue{background:rgba(126,184,226,.1);color:var(--blue)}
+ 
+.mode-title{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.mode-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.mode-meta{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);margin-top:4px}
+ 
+.info-strip{
+  background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);
+  padding:1rem 1.25rem;font-size:12px;color:var(--muted);display:flex;gap:12px;align-items:flex-start;
+}
+.info-strip svg{flex-shrink:0;margin-top:2px;opacity:.5}
+ 
+/* ═══════════════════════════════════════════
+   WAT — WORD DISPLAY
+═══════════════════════════════════════════ */
+.word-stage{padding:2.5rem 1.5rem 2rem;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#watWordDisplay{
+  font-family:var(--mono);font-size:52px;font-weight:500;color:var(--text);
+  letter-spacing:.04em;min-height:68px;display:flex;align-items:center;justify-content:center;
+}
+#watWordDisplay.flash{animation:wordFlash .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes wordFlash{from{opacity:0;transform:scale(.88) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+ 
+/* ═══════════════════════════════════════════
+   SRT — SITUATION DISPLAY
+═══════════════════════════════════════════ */
+.sit-stage{padding:2rem 1.5rem 1.5rem;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#srtSitDisplay{
+  font-size:18px;font-weight:400;color:var(--text);line-height:1.7;
+  max-width:540px;
+}
+#srtSitDisplay.flash{animation:sitFlash .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes sitFlash{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+ 
+.sit-num-badge{
+  font-family:var(--mono);font-size:11px;color:var(--blue);letter-spacing:.08em;
+  margin-bottom:14px;
+}
+ 
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════ */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+ 
+/* divider */
+.divider{border:none;border-top:0.5px solid var(--border);margin:1.5rem 0}
+ 
+/* back link */
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;margin-bottom:1.5rem;font-family:var(--mono);letter-spacing:.04em}
+.back-link:hover{color:var(--text)}
+</style>
 </head>
 <body>
-
 <div class="container">
-
-  <!-- Header -->
-  <div class="header">
-    <div class="header-top">
-      <span class="badge">SSB Psych</span>
-      <h1>Word Association Test</h1>
+ 
+<!-- ══════════════════════════════════════
+     HOME SCREEN
+══════════════════════════════════════ -->
+<div id="homeScreen" class="screen active">
+  <div class="home-header">
+    <div class="home-header-top">
+      <span class="badge gold">SSB Psych Suite</span>
     </div>
-    <p class="subtitle">Enter your word list, set the interval, and begin the WAT session.</p>
+    <h1 style="font-size:26px;margin-bottom:8px">Practice Tests</h1>
+    <p class="home-subtitle">Simulate the SSB psychological tests under timed conditions. Choose a test below to begin.</p>
   </div>
-
-  <!-- Setup -->
-  <div class="card" id="setupPanel">
-    <div class="card-label">Word list</div>
-    <textarea id="wordInput" placeholder="brave, calm, leader, honest, duty, friend, river, cloud, fire, jungle…"></textarea>
-    <div class="meta-row">
-      <span class="word-count" id="wordCount">0 words loaded</span>
+ 
+  <div class="mode-grid">
+    <!-- WAT card -->
+    <div class="mode-card gold-card" onclick="goTo('watSetupScreen')">
+      <div class="mode-icon gold">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+      </div>
+      <div>
+        <div class="mode-title">WAT</div>
+        <div style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:6px">Word Association Test</div>
+        <div class="mode-desc">A stimulus word appears every 15 seconds. Write the first sentence that comes to mind.</div>
+      </div>
+      <div class="mode-meta">60 words &bull; 15 s default</div>
     </div>
-
+ 
+    <!-- SRT card -->
+    <div class="mode-card blue-card" onclick="goTo('srtSetupScreen')">
+      <div class="mode-icon blue">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <div>
+        <div class="mode-title">SRT</div>
+        <div style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:6px">Situation Reaction Test</div>
+        <div class="mode-desc">A real-life situation is presented. Write what you would do in 30 seconds.</div>
+      </div>
+      <div class="mode-meta">60 situations &bull; 30 s default</div>
+    </div>
+  </div>
+ 
+  <div class="info-strip">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span>Both tests are used by the Services Selection Board to assess personality, OLQ traits, and decision-making speed. Practice regularly to improve your spontaneous response quality.</span>
+  </div>
+</div>
+ 
+ 
+<!-- ══════════════════════════════════════
+     WAT — SETUP SCREEN
+══════════════════════════════════════ -->
+<div id="watSetupScreen" class="screen">
+  <div class="back-link" onclick="goTo('homeScreen')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Home
+  </div>
+  <div class="home-header">
+    <div class="home-header-top"><span class="badge gold">WAT</span></div>
+    <h1 style="margin-bottom:6px">Word Association Test</h1>
+    <p style="font-size:13px;color:var(--muted)">Enter or paste your word list, set the display interval, then begin.</p>
+  </div>
+ 
+  <div class="card">
+    <div class="card-label">Word list — comma or newline separated</div>
+    <textarea id="watWordInput" placeholder="brave, calm, leader, honest, duty, friend, river, cloud, fire, jungle…"></textarea>
+    <div class="meta-row">
+      <span class="item-count" id="watWordCount">0 words loaded</span>
+    </div>
     <div class="interval-row">
       <span>Interval</span>
-      <input type="range" id="intervalSlider" min="10" max="60" step="1" value="15" />
-      <span class="interval-display"><span id="intervalVal">15</span>s</span>
+      <input type="range" id="watSlider" min="10" max="60" step="1" value="15"/>
+      <span class="interval-display"><span id="watSliderVal">15</span>s</span>
     </div>
-
     <div class="btn-row">
-      <button class="primary" id="loadBtn" onclick="loadWords()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Load words &amp; start WAT
+      <button class="primary" onclick="watLoad()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Load &amp; Start WAT
       </button>
     </div>
   </div>
-
-  <!-- Display -->
-  <div class="card" id="displayPanel">
+</div>
+ 
+ 
+<!-- ══════════════════════════════════════
+     WAT — DISPLAY SCREEN
+══════════════════════════════════════ -->
+<div id="watDisplayScreen" class="screen">
+  <div class="card" style="text-align:center">
     <div class="word-stage">
-      <div id="wordDisplay">—</div>
+      <div id="watWordDisplay">—</div>
       <div class="ring-wrap">
-        <svg id="timerRing" width="76" height="76" viewBox="0 0 76 76">
+        <svg width="76" height="76" viewBox="0 0 76 76" overflow="visible">
           <circle cx="38" cy="38" r="32" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="5"/>
-          <circle id="ringArc" cx="38" cy="38" r="32" fill="none"
+          <circle id="watArc" cx="38" cy="38" r="32" fill="none"
             stroke="#e2c97e" stroke-width="5" stroke-linecap="round"
             stroke-dasharray="201.06" stroke-dashoffset="0"
-            transform="rotate(-90 38 38)"/>
-          <text id="ringNum" x="38" y="43" text-anchor="middle"
-            font-family="'IBM Plex Mono', monospace" font-size="17" font-weight="500"
-            fill="#e8eaf0">15</text>
+            transform="rotate(-90 38 38)" style="transition:stroke-dashoffset .15s linear,stroke .3s"/>
+          <text id="watRingNum" x="38" y="44" text-anchor="middle"
+            font-family="'IBM Plex Mono',monospace" font-size="17" font-weight="500" fill="#e8eaf0">15</text>
         </svg>
       </div>
-      <div class="progress-info" id="progressInfo">Word 1 of 0</div>
+      <div class="progress-info" id="watProgressInfo">Word 1 of 0</div>
     </div>
     <div class="controls">
-      <button id="pauseBtn" onclick="togglePause()">
-        <svg id="pauseIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-        <span id="pauseLabel">Pause</span>
+      <button id="watPauseBtn" onclick="watTogglePause()">
+        <svg id="watPauseIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        <span id="watPauseLabel">Pause</span>
       </button>
-      <button class="danger" onclick="finishTest()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 16M4 20L20 4"/></svg>
+      <button class="danger" onclick="watFinish()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         Finish
       </button>
     </div>
   </div>
-
-  <!-- Summary -->
-  <div class="card" id="summaryPanel">
+</div>
+ 
+ 
+<!-- ══════════════════════════════════════
+     WAT — SUMMARY SCREEN
+══════════════════════════════════════ -->
+<div id="watSummaryScreen" class="screen">
+  <div class="card">
     <div class="summary-header">
-      <h2>Session complete</h2>
-      <span class="done-badge">Done</span>
+      <h2>WAT Complete</h2>
+      <span class="badge green">Done</span>
     </div>
     <div class="stats-row">
-      <div class="stat-box">
-        <div class="val" id="statShown">0</div>
-        <div class="lbl">Words shown</div>
-      </div>
-      <div class="stat-box">
-        <div class="val" id="statSkipped">0</div>
-        <div class="lbl">Not reached</div>
-      </div>
-      <div class="stat-box">
-        <div class="val" id="statTime">0s</div>
-        <div class="lbl">Interval used</div>
-      </div>
+      <div class="stat-box"><div class="val" id="watStatShown">0</div><div class="lbl">Words shown</div></div>
+      <div class="stat-box"><div class="val" id="watStatSkipped">0</div><div class="lbl">Not reached</div></div>
+      <div class="stat-box"><div class="val" id="watStatTime">0s</div><div class="lbl">Interval used</div></div>
     </div>
-    <div class="word-list" id="wordListSummary"></div>
-    <div>
-      <button onclick="resetAll()">
+    <div class="word-list" id="watSummaryList"></div>
+    <div class="btn-row">
+      <button onclick="goTo('watSetupScreen')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
-        New session
+        New WAT session
+      </button>
+      <button onclick="goTo('homeScreen')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
       </button>
     </div>
   </div>
-
 </div>
-
+ 
+ 
+<!-- ══════════════════════════════════════
+     SRT — SETUP SCREEN
+══════════════════════════════════════ -->
+<div id="srtSetupScreen" class="screen">
+  <div class="back-link" onclick="goTo('homeScreen')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Home
+  </div>
+  <div class="home-header">
+    <div class="home-header-top"><span class="badge blue">SRT</span></div>
+    <h1 style="margin-bottom:6px">Situation Reaction Test</h1>
+    <p style="font-size:13px;color:var(--muted)">Upload a .txt file or paste situations below (one per line). Set the interval and begin.</p>
+  </div>
+ 
+  <div class="card">
+    <div class="card-label">Upload situations (.txt — one situation per line)</div>
+    <input type="file" id="srtFileInput" accept=".txt" onchange="srtHandleFile(this)"/>
+    <hr class="divider"/>
+    <div class="card-label">Or paste situations directly</div>
+    <textarea id="srtTextInput" placeholder="You are hiking alone and notice someone has fallen down a cliff nearby.&#10;You are on a train and see a fire break out in the next coach.&#10;Your teammate makes a mistake during an important mission…"></textarea>
+    <div class="meta-row">
+      <span class="item-count" id="srtSitCount">0 situations loaded</span>
+    </div>
+    <div class="interval-row">
+      <span>Interval</span>
+      <input type="range" id="srtSlider" min="15" max="90" step="5" value="30"/>
+      <span class="interval-display blue-val"><span id="srtSliderVal">30</span>s</span>
+    </div>
+    <div class="btn-row">
+      <button class="primary blue" onclick="srtLoad()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Load &amp; Start SRT
+      </button>
+    </div>
+  </div>
+</div>
+ 
+ 
+<!-- ══════════════════════════════════════
+     SRT — DISPLAY SCREEN
+══════════════════════════════════════ -->
+<div id="srtDisplayScreen" class="screen">
+  <div class="card" style="text-align:center">
+    <div class="sit-stage">
+      <div class="sit-num-badge" id="srtSitNum">SITUATION 1</div>
+      <div id="srtSitDisplay">—</div>
+      <div class="ring-wrap">
+        <svg width="76" height="76" viewBox="0 0 76 76" overflow="visible">
+          <circle cx="38" cy="38" r="32" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="5"/>
+          <circle id="srtArc" cx="38" cy="38" r="32" fill="none"
+            stroke="#7eb8e2" stroke-width="5" stroke-linecap="round"
+            stroke-dasharray="201.06" stroke-dashoffset="0"
+            transform="rotate(-90 38 38)" style="transition:stroke-dashoffset .15s linear,stroke .3s"/>
+          <text id="srtRingNum" x="38" y="44" text-anchor="middle"
+            font-family="'IBM Plex Mono',monospace" font-size="17" font-weight="500" fill="#e8eaf0">30</text>
+        </svg>
+      </div>
+      <div class="progress-info" id="srtProgressInfo">Situation 1 of 0</div>
+    </div>
+    <div class="controls">
+      <button id="srtPauseBtn" onclick="srtTogglePause()">
+        <svg id="srtPauseIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        <span id="srtPauseLabel">Pause</span>
+      </button>
+      <button class="danger" onclick="srtFinish()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Finish
+      </button>
+    </div>
+  </div>
+</div>
+ 
+ 
+<!-- ══════════════════════════════════════
+     SRT — SUMMARY SCREEN
+══════════════════════════════════════ -->
+<div id="srtSummaryScreen" class="screen">
+  <div class="card">
+    <div class="summary-header">
+      <h2>SRT Complete</h2>
+      <span class="badge green">Done</span>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="val blue" id="srtStatShown">0</div><div class="lbl">Situations shown</div></div>
+      <div class="stat-box"><div class="val blue" id="srtStatSkipped">0</div><div class="lbl">Not reached</div></div>
+      <div class="stat-box"><div class="val blue" id="srtStatTime">0s</div><div class="lbl">Interval used</div></div>
+    </div>
+    <div class="card-label" style="margin-bottom:8px">Situations covered</div>
+    <div class="word-list" id="srtSummaryList"></div>
+    <div class="btn-row">
+      <button onclick="goTo('srtSetupScreen')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+        New SRT session
+      </button>
+      <button onclick="goTo('homeScreen')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </button>
+    </div>
+  </div>
+</div>
+ 
+</div><!-- /container -->
+ 
 <script>
-  /* ── State ── */
-  let words      = [];
-  let current    = 0;
-  let interval   = 15;
-  let timeLeft   = 15;
-  let paused     = false;
-  let finished   = false;
-  let timer      = null;
-  let shownSet   = new Set();
-  const CIRC     = 2 * Math.PI * 32; // r=32
-
-  /* ── DOM refs ── */
-  const wordInput    = document.getElementById('wordInput');
-  const wordCountEl  = document.getElementById('wordCount');
-  const intervalSldr = document.getElementById('intervalSlider');
-  const intervalVal  = document.getElementById('intervalVal');
-  const wordDisplay  = document.getElementById('wordDisplay');
-  const ringArc      = document.getElementById('ringArc');
-  const ringNum      = document.getElementById('ringNum');
-  const progressInfo = document.getElementById('progressInfo');
-  const pauseBtn     = document.getElementById('pauseBtn');
-  const pauseLabel   = document.getElementById('pauseLabel');
-  const pauseIcon    = document.getElementById('pauseIcon');
-  const setupPanel   = document.getElementById('setupPanel');
-  const displayPanel = document.getElementById('displayPanel');
-  const summaryPanel = document.getElementById('summaryPanel');
-
-  /* ── Slider ── */
-  intervalSldr.addEventListener('input', () => {
-    interval = parseInt(intervalSldr.value);
-    intervalVal.textContent = interval;
+/* ═══════════════════════════════════════════
+   ROUTER
+═══════════════════════════════════════════ */
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+ 
+/* ═══════════════════════════════════════════
+   SHARED CONSTANTS
+═══════════════════════════════════════════ */
+const CIRC = 2 * Math.PI * 32; // r=32
+ 
+/* ═══════════════════════════════════════════
+   ████████  W A T  ████████
+═══════════════════════════════════════════ */
+let watWords    = [];
+let watCurrent  = 0;
+let watInterval = 15;
+let watTimeLeft = 15;
+let watPaused   = false;
+let watFinished = false;
+let watTimer    = null;
+let watShown    = new Set();
+ 
+// DOM
+const watWordInput  = document.getElementById('watWordInput');
+const watWordCountEl= document.getElementById('watWordCount');
+const watSlider     = document.getElementById('watSlider');
+const watSliderVal  = document.getElementById('watSliderVal');
+const watWordDisp   = document.getElementById('watWordDisplay');
+const watArc        = document.getElementById('watArc');
+const watRingNum    = document.getElementById('watRingNum');
+const watProgInfo   = document.getElementById('watProgressInfo');
+const watPauseLabel = document.getElementById('watPauseLabel');
+const watPauseIcon  = document.getElementById('watPauseIcon');
+ 
+watSlider.addEventListener('input', () => {
+  watInterval = parseInt(watSlider.value);
+  watSliderVal.textContent = watInterval;
+});
+watWordInput.addEventListener('input', () => {
+  watWordCountEl.textContent = parseLines(watWordInput.value, 'words').length + ' words loaded';
+  watWordInput.classList.remove('error');
+});
+ 
+function parseWords(raw) {
+  return raw.split(/[\n,]+/).map(w => w.trim()).filter(Boolean);
+}
+function parseLines(raw, _) {
+  return raw.split(/[\n,]+/).map(w => w.trim()).filter(Boolean);
+}
+ 
+function watLoad() {
+  const parsed = parseWords(watWordInput.value);
+  if (!parsed.length) { watWordInput.classList.add('error'); watWordInput.focus(); return; }
+  watWords    = parsed;
+  watCurrent  = 0;
+  watShown    = new Set();
+  watFinished = false;
+  watPaused   = false;
+  watInterval = parseInt(watSlider.value);
+  watPauseLabel.textContent = 'Pause';
+  setPauseIcon(watPauseIcon, false);
+  goTo('watDisplayScreen');
+  watShowWord();
+}
+ 
+function watShowWord() {
+  if (watCurrent >= watWords.length) { watFinish(); return; }
+  const w = watWords[watCurrent];
+  watShown.add(w);
+  watWordDisp.textContent = w;
+  watWordDisp.classList.remove('flash');
+  void watWordDisp.offsetWidth;
+  watWordDisp.classList.add('flash');
+  watProgInfo.textContent = 'Word ' + (watCurrent+1) + ' of ' + watWords.length;
+  watTimeLeft = watInterval;
+  watUpdateRing();
+  clearInterval(watTimer);
+  watTimer = setInterval(watTick, 1000);
+}
+ 
+function watTick() {
+  if (watPaused) return;
+  watTimeLeft--;
+  watUpdateRing();
+  if (watTimeLeft <= 0) { clearInterval(watTimer); watCurrent++; if (!watFinished) watShowWord(); }
+}
+ 
+function watUpdateRing() {
+  const frac = Math.max(0, watTimeLeft / watInterval);
+  watArc.style.strokeDashoffset = CIRC * (1 - frac);
+  watRingNum.textContent = watTimeLeft;
+  watArc.style.stroke = watTimeLeft <= 5 ? '#e25c5c' : watTimeLeft <= Math.ceil(watInterval*.4) ? '#e2a45c' : '#e2c97e';
+}
+ 
+function watTogglePause() {
+  watPaused = !watPaused;
+  watPauseLabel.textContent = watPaused ? 'Resume' : 'Pause';
+  setPauseIcon(watPauseIcon, watPaused);
+}
+ 
+function watFinish() {
+  watFinished = true;
+  clearInterval(watTimer);
+  document.getElementById('watStatShown').textContent   = watShown.size;
+  document.getElementById('watStatSkipped').textContent = watWords.length - watShown.size;
+  document.getElementById('watStatTime').textContent    = watInterval + 's';
+  const list = document.getElementById('watSummaryList');
+  list.innerHTML = '';
+  watWords.forEach(w => {
+    const p = document.createElement('span');
+    p.className = 'word-pill ' + (watShown.has(w) ? 'shown' : 'skipped');
+    p.textContent = w;
+    list.appendChild(p);
   });
-
-  /* ── Word count live update ── */
-  wordInput.addEventListener('input', () => {
-    wordCountEl.textContent = parseWords(wordInput.value).length + ' words loaded';
-    wordInput.classList.remove('error');
+  goTo('watSummaryScreen');
+}
+ 
+ 
+/* ═══════════════════════════════════════════
+   ████████  S R T  ████████
+═══════════════════════════════════════════ */
+let srtSits     = [];
+let srtCurrent  = 0;
+let srtInterval = 30;
+let srtTimeLeft = 30;
+let srtPaused   = false;
+let srtFinished = false;
+let srtTimer    = null;
+let srtShownIdx = new Set();
+ 
+// DOM
+const srtTextInput  = document.getElementById('srtTextInput');
+const srtSitCountEl = document.getElementById('srtSitCount');
+const srtSlider     = document.getElementById('srtSlider');
+const srtSliderVal  = document.getElementById('srtSliderVal');
+const srtSitDisp    = document.getElementById('srtSitDisplay');
+const srtSitNum     = document.getElementById('srtSitNum');
+const srtArc        = document.getElementById('srtArc');
+const srtRingNum    = document.getElementById('srtRingNum');
+const srtProgInfo   = document.getElementById('srtProgressInfo');
+const srtPauseLabel = document.getElementById('srtPauseLabel');
+const srtPauseIcon  = document.getElementById('srtPauseIcon');
+ 
+srtSlider.addEventListener('input', () => {
+  srtInterval = parseInt(srtSlider.value);
+  srtSliderVal.textContent = srtInterval;
+});
+srtTextInput.addEventListener('input', () => {
+  srtSitCountEl.textContent = parseSits(srtTextInput.value).length + ' situations loaded';
+  srtTextInput.classList.remove('error');
+});
+ 
+function parseSits(raw) {
+  return raw.split('\n').map(l => l.trim()).filter(Boolean);
+}
+ 
+function srtHandleFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    srtTextInput.value = e.target.result;
+    srtSitCountEl.textContent = parseSits(e.target.result).length + ' situations loaded';
+  };
+  reader.readAsText(file);
+}
+ 
+function srtLoad() {
+  const parsed = parseSits(srtTextInput.value);
+  if (!parsed.length) { srtTextInput.classList.add('error'); srtTextInput.focus(); return; }
+  srtSits     = parsed;
+  srtCurrent  = 0;
+  srtShownIdx = new Set();
+  srtFinished = false;
+  srtPaused   = false;
+  srtInterval = parseInt(srtSlider.value);
+  srtPauseLabel.textContent = 'Pause';
+  setPauseIcon(srtPauseIcon, false);
+  goTo('srtDisplayScreen');
+  srtShowSit();
+}
+ 
+function srtShowSit() {
+  if (srtCurrent >= srtSits.length) { srtFinish(); return; }
+  srtShownIdx.add(srtCurrent);
+  const sit = srtSits[srtCurrent];
+  srtSitNum.textContent = 'SITUATION ' + (srtCurrent + 1);
+  srtSitDisp.textContent = sit;
+  srtSitDisp.classList.remove('flash');
+  void srtSitDisp.offsetWidth;
+  srtSitDisp.classList.add('flash');
+  srtProgInfo.textContent = 'Situation ' + (srtCurrent+1) + ' of ' + srtSits.length;
+  srtTimeLeft = srtInterval;
+  srtUpdateRing();
+  clearInterval(srtTimer);
+  srtTimer = setInterval(srtTick, 1000);
+}
+ 
+function srtTick() {
+  if (srtPaused) return;
+  srtTimeLeft--;
+  srtUpdateRing();
+  if (srtTimeLeft <= 0) { clearInterval(srtTimer); srtCurrent++; if (!srtFinished) srtShowSit(); }
+}
+ 
+function srtUpdateRing() {
+  const frac = Math.max(0, srtTimeLeft / srtInterval);
+  srtArc.style.strokeDashoffset = CIRC * (1 - frac);
+  srtRingNum.textContent = srtTimeLeft;
+  srtArc.style.stroke = srtTimeLeft <= 5 ? '#e25c5c' : srtTimeLeft <= Math.ceil(srtInterval*.4) ? '#e2a45c' : '#7eb8e2';
+}
+ 
+function srtTogglePause() {
+  srtPaused = !srtPaused;
+  srtPauseLabel.textContent = srtPaused ? 'Resume' : 'Pause';
+  setPauseIcon(srtPauseIcon, srtPaused);
+}
+ 
+function srtFinish() {
+  srtFinished = true;
+  clearInterval(srtTimer);
+  document.getElementById('srtStatShown').textContent   = srtShownIdx.size;
+  document.getElementById('srtStatSkipped').textContent = srtSits.length - srtShownIdx.size;
+  document.getElementById('srtStatTime').textContent    = srtInterval + 's';
+  const list = document.getElementById('srtSummaryList');
+  list.innerHTML = '';
+  srtSits.forEach((s, i) => {
+    const p = document.createElement('span');
+    p.className = 'sit-pill ' + (srtShownIdx.has(i) ? 'shown' : 'skipped');
+    // Show truncated situation text
+    p.textContent = (i+1) + '. ' + (s.length > 40 ? s.slice(0,40) + '…' : s);
+    p.title = s;
+    list.appendChild(p);
   });
-
-  function parseWords(raw) {
-    return raw.split(/[\n,]+/).map(w => w.trim()).filter(w => w.length > 0);
-  }
-
-  /* ── Load & start ── */
-  function loadWords() {
-    const parsed = parseWords(wordInput.value);
-    if (parsed.length === 0) {
-      wordInput.classList.add('error');
-      wordInput.focus();
-      return;
-    }
-    words    = parsed;
-    current  = 0;
-    shownSet = new Set();
-    finished = false;
-    paused   = false;
-    interval = parseInt(intervalSldr.value);
-
-    setupPanel.style.display = 'none';
-    displayPanel.classList.add('active');
-    summaryPanel.classList.remove('active');
-    pauseLabel.textContent = 'Pause';
-    setPauseIcon(false);
-
-    showWord();
-  }
-
-  /* ── Show word ── */
-  function showWord() {
-    if (current >= words.length) { finishTest(); return; }
-    const w = words[current];
-    shownSet.add(w);
-
-    wordDisplay.textContent = w;
-    wordDisplay.classList.remove('flash');
-    void wordDisplay.offsetWidth;
-    wordDisplay.classList.add('flash');
-
-    progressInfo.textContent = 'Word ' + (current + 1) + ' of ' + words.length;
-    timeLeft = interval;
-    updateRing();
-
-    clearInterval(timer);
-    timer = setInterval(tick, 1000);
-  }
-
-  /* ── Tick ── */
-  function tick() {
-    if (paused) return;
-    timeLeft--;
-    updateRing();
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      current++;
-      if (!finished) showWord();
-    }
-  }
-
-  /* ── Ring ── */
-  function updateRing() {
-    const frac   = Math.max(0, timeLeft / interval);
-    const offset = CIRC * (1 - frac);
-    ringArc.style.strokeDashoffset = offset;
-    ringNum.textContent = timeLeft;
-
-    if (timeLeft <= 5)                          ringArc.style.stroke = '#e25c5c';
-    else if (timeLeft <= Math.ceil(interval * 0.4)) ringArc.style.stroke = '#e2a45c';
-    else                                         ringArc.style.stroke = '#e2c97e';
-  }
-
-  /* ── Pause / resume ── */
-  function togglePause() {
-    paused = !paused;
-    pauseLabel.textContent = paused ? 'Resume' : 'Pause';
-    setPauseIcon(paused);
-  }
-
-  function setPauseIcon(isPlay) {
-    pauseIcon.innerHTML = isPlay
-      ? '<polygon points="5 3 19 12 5 21 5 3"/>'
-      : '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
-  }
-
-  /* ── Finish ── */
-  function finishTest() {
-    finished = true;
-    clearInterval(timer);
-
-    displayPanel.classList.remove('active');
-    summaryPanel.classList.add('active');
-
-    const shown   = shownSet.size;
-    const skipped = words.length - shown;
-    document.getElementById('statShown').textContent   = shown;
-    document.getElementById('statSkipped').textContent = skipped;
-    document.getElementById('statTime').textContent    = interval + 's';
-
-    const container = document.getElementById('wordListSummary');
-    container.innerHTML = '';
-    words.forEach(w => {
-      const pill = document.createElement('span');
-      pill.className = 'word-pill ' + (shownSet.has(w) ? 'shown' : 'skipped');
-      pill.textContent = w;
-      container.appendChild(pill);
-    });
-  }
-
-  /* ── Reset ── */
-  function resetAll() {
-    clearInterval(timer);
-    words = []; current = 0; shownSet = new Set();
-    paused = false; finished = false;
-    wordInput.value = '';
-    wordCountEl.textContent = '0 words loaded';
-    setupPanel.style.display = '';
-    displayPanel.classList.remove('active');
-    summaryPanel.classList.remove('active');
-  }
+  goTo('srtSummaryScreen');
+}
+ 
+ 
+/* ═══════════════════════════════════════════
+   SHARED UTILITY
+═══════════════════════════════════════════ */
+function setPauseIcon(el, isPlay) {
+  el.innerHTML = isPlay
+    ? '<polygon points="5 3 19 12 5 21 5 3"/>'
+    : '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+}
 </script>
 </body>
 </html>
+ 
